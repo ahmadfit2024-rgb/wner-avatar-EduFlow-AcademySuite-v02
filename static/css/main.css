@@ -1,0 +1,41 @@
+/*
+ * Custom project-wide styles can be added here.
+ */
+
+/* --- General UX Enhancements --- */
+
+/* Smooth transitions for key interactive elements */
+.btn, .card, .list-group-item {
+    transition: all 0.25s ease-in-out;
+}
+
+/* Add a subtle lift effect to cards on hover */
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.06);
+}
+
+/* --- Page Content Wrapper --- */
+#page-content-wrapper {
+    transition: margin-left 0.4s;
+}
+
+#wrapper.toggled #page-content-wrapper {
+    margin-left: -250px; /* Same width as the sidebar */
+}
+
+/* --- Animations --- */
+/* A simple fade-in animation for page content */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+main.container-fluid {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Specific component styles */
+.kpi-card {
+    border-left: 4px solid var(--color-navy);
+}
