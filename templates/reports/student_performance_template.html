@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Student Performance Report</title>
+    <style>
+        body { font-family: sans-serif; }
+        h1 { color: #0A2540; } /* Deep Navy */
+        .metric { margin-bottom: 10px; }
+        .label { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Student Performance Report</h1>
+    <hr>
+    <div class="metric"><span class="label">Student Name:</span> {{ student.name }}</div>
+    <div class="metric"><span class="label">Course:</span> {{ student.course }}</div>
+    <div class="metric"><span class="label">Overall Progress:</span> {{ student.progress }}%</div>
+    <div class="metric"><span class="label">Average Score:</span> {{ student.average_score }}%</div>
+</body>
+</html>

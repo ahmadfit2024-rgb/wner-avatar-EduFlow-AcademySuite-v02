@@ -1,0 +1,20 @@
+{% raw %}{% load i18n %}
+<ul class="list-group list-group-flush" id="lesson-list">
+    {% for lesson in course.lessons|dictsort:"order" %}
+    <li class="list-group-item d-flex align-items-center" data-lesson-id="{{ lesson._id }}">
+        <span class="drag-handle text-muted" style="cursor: grab; margin-right: 1rem;"><i class="bi bi-grip-vertical"></i></span>
+        <div>
+            <h6 class="mb-0">{{ lesson.title }}</h6>
+            <small class="text-muted text-capitalize">{{ lesson.content_type }}</small>
+        </div>
+        <div class="ms-auto">
+            <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></button>
+            <button class="btn btn-sm btn-outline-danger ms-1"><i class="bi bi-trash"></i></button>
+        </div>
+    </li>
+    {% empty %}
+    <li class="list-group-item text-center text-muted py-4">
+        {% trans "This course has no lessons yet. Add one to get started!" %}
+    </li>
+    {% endfor %}
+</ul>

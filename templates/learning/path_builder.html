@@ -1,0 +1,132 @@
+{% raw %}{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Path Builder" %}: {{ learning_path.title }}{% endblock %}
+
+{% block content %}
+<div class="path-builder-container">
+    
+    <div class="path-builder-panel library-panel">
+        <div class="panel-header">
+            <i class="bi bi-collection-fill me-2"></i> {% trans "Course Library" %}
+        </div>
+        <div class="panel-body">
+            <input type="text" class="form-control form-control-sm mb-3" placeholder="{% trans 'Search courses...' %}">
+            <div id="course-library-list" class="list-group course-list">
+                {% for course in available_courses %}
+                <div class="list-group-item course-card" data-course-id="{{ course.pk }}">
+                    <h6 class="mb-1">{{ course.title }}</h6>
+                    <small class="text-muted">{{ course.category }}</small>
+                </div>
+                {% empty %}
+                <p class="text-muted small p-2">{% trans "No other courses available." %}</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="path-builder-panel canvas-panel">
+        <div class="panel-header d-flex justify-content-between">
+            <div>
+                <i class="bi bi-diagram-3-fill me-2"></i> {{ learning_path.title }}
+            </div>
+            <span class="htmx-indicator">
+                <div class="spinner-border spinner-border-sm" role="status">
+                    <span class="visually-hidden">Saving...</span>
+                </div>
+            </span>
+        </div>
+        <div 
+            id="path-structure-list" 
+            class="panel-body course-list"
+            hx-post="{% url 'learning-path-update-structure' pk=learning_path.pk %}"
+            hx-trigger="end"
+            hx-swap="none"
+        >
+            {% for module in learning_path.modules %}
+            <div class="list-group-item course-card" data-course-id="{{ module.course_id }}">
+                <h6 class="mb-1">{{ module.course.title }}</h6>
+                <small class="text-muted">{{ module.course.category }}</small>
+            </div>
+            {% empty %}
+            <div class="text-center text-muted p-5 placeholder-area">
+                <i class="bi bi-box-arrow-in-down" style="font-size: 3rem;"></i>
+                <p>{% trans "Drag courses from the library here to build the path." %}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="path-builder-panel properties-panel">
+        <div class="panel-header">
+            <i class="bi bi-sliders me-2"></i> {% trans "Properties" %}
+        </div>
+        <div class="panel-body">
+            <p class="text-muted small">{% trans "Select a course module from the canvas to see its properties." %}</p>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+.path-builder-container { display: flex; gap: 1rem; height: calc(100vh - 150px); }
+.path-builder-panel { background: #fff; border-radius: 0.5rem; border: 1px solid var(--color-border); display: flex; flex-direction: column; }
+.library-panel { flex: 0 0 300px; }
+.canvas-panel { flex: 1; }
+.properties-panel { flex: 0 0 300px; }
+.panel-header { font-weight: 600; padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); }
+.panel-body { padding: 1rem; overflow-y: auto; flex-grow: 1; }
+.course-list .course-card { cursor: grab; margin-bottom: 0.5rem; border-radius: 0.375rem; }
+.course-list .course-card:hover { background-color: var(--bs-light); }
+.sortable-ghost { opacity: 0.4; background: #cce5ff; }
+.placeholder-area { border: 2px dashed var(--color-border); border-radius: 0.5rem; }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const library = document.getElementById('course-library-list');
+    const canvas = document.getElementById('path-structure-list');
+
+    // Initialize SortableJS for the library (clone items)
+    new Sortable(library, {
+        group: {
+            name: 'shared',
+            pull: 'clone',
+            put: false
+        },
+        sort: false, // Don't sort items in the library
+        animation: 150
+    });
+
+    // Initialize SortableJS for the canvas (receive and reorder)
+    new Sortable(canvas, {
+        group: 'shared',
+        animation: 150,
+        onEnd: function (evt) {
+            // This event is used to trigger HTMX
+            // HTMX listens for the 'end' event on the canvas element
+            // We need to pass the new order of courses to the hx-post request
+            const courseIds = Array.from(canvas.children)
+                                 .map(child => child.dataset.courseId)
+                                 .filter(id => id); // Filter out potential placeholder elements
+            
+            // Set the parameters for the HTMX request
+            htmx.trigger(canvas, 'end', { course_ids: courseIds });
+        }
+    });
+
+    // Handle HTMX request parameters
+    // Before an HTMX request is made from the canvas, this script
+    // will add the ordered list of course IDs to the request body.
+    canvas.addEventListener('htmx:configRequest', function (evt) {
+        evt.detail.parameters['course_ids'] = Array.from(canvas.children)
+                                                    .map(child => child.dataset.courseId)
+                                                    .filter(id => id);
+    });
+});
+</script>
+{% endblock %}{% endraw %}

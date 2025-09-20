@@ -1,0 +1,91 @@
+{% raw %}{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="mb-4">
+        <h1 class="h2">{% trans "Reporting Dashboard" %}</h1>
+        <p class="text-muted">{% trans "Select, filter, and generate insightful reports to download." %}</p>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">{% trans "Generate Report" %}</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="report-form">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="report_type" class="form-label">{% trans "1. Select Report Type" %}</label>
+                            <select class="form-select" id="report_type" name="report_type">
+                                <option value="">-- {% trans "Choose a report" %} --</option>
+                                <option value="student_pdf">{% trans "Student Performance (PDF)" %}</option>
+                                <option value="course_excel">{% trans "Course Enrollments (Excel)" %}</option>
+                            </select>
+                        </div>
+
+                        <div id="dynamic-filters" class="mt-4">
+                            <label class="form-label">{% trans "2. Apply Filters" %}</label>
+                            <div id="student-filter-group" class="mb-3 d-none">
+                                <label for="student_id" class="form-label small">{% trans "Select Student" %}</label>
+                                <select class="form-select" name="student_id">
+                                    {% for student in students %}
+                                    <option value="{{ student.id }}">{{ student.full_name|default:student.username }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div id="course-filter-group" class="mb-3 d-none">
+                                <label for="course_id" class="form-label small">{% trans "Select Course" %}</label>
+                                <select class="form-select" name="course_id">
+                                    {% for course in courses %}
+                                    <option value="{{ course.pk }}">{{ course.title }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-4">
+                            <button type="submit" id="generate-btn" class="btn btn-primary" disabled>
+                                <i class="bi bi-download me-2"></i>{% trans "Generate Report" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const reportTypeSelect = document.getElementById('report_type');
+    const studentFilter = document.getElementById('student-filter-group');
+    const courseFilter = document.getElementById('course-filter-group');
+    const generateBtn = document.getElementById('generate-btn');
+
+    reportTypeSelect.addEventListener('change', function() {
+        // Hide all filters first
+        studentFilter.classList.add('d-none');
+        courseFilter.classList.add('d-none');
+
+        const selectedType = this.value;
+
+        if (selectedType === 'student_pdf') {
+            studentFilter.classList.remove('d-none');
+        } else if (selectedType === 'course_excel') {
+            courseFilter.classList.remove('d-none');
+        }
+
+        // Enable or disable the generate button
+        generateBtn.disabled = !selectedType;
+    });
+});
+</script>
+{% endblock %}{% endraw %}

@@ -1,0 +1,26 @@
+{% raw %}{% load i18n %}
+{% get_discussions_for_lesson current_lesson_id as threads %}
+{% get_discussion_form as form %}
+
+<div class="discussion-container">
+    <h5 class="mb-3">{% trans "Ask a Question" %}</h5>
+    <form hx-post="{% url 'interactions:add_thread' lesson_id=current_lesson_id %}"
+          hx-target="#discussion-content"
+          hx-swap="innerHTML">
+        {% csrf_token %}
+        <input type="hidden" name="course_id" value="{{ course.pk }}">
+        
+        <div class="mb-3">{{ form.title }}</div>
+        <div class="mb-3">{{ form.question }}</div>
+
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary">{% trans "Post Question" %}</button>
+        </div>
+    </form>
+    
+    <hr class="my-4">
+
+    <div id="discussion-content">
+        {% include 'interactions/partials/_discussion_forum_content.html' with threads=threads %}
+    </div>
+</div>
